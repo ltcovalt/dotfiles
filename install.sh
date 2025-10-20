@@ -12,6 +12,7 @@ if [[ "$IS_SOURCED" == false ]]; then
   set -Eeuo pipefail
 fi
 
+# creates a symbolic link to a directory
 link_dir() {
   local source="$1"
   local dest="$2"
@@ -31,6 +32,7 @@ link_dir() {
   echo "symlink created: $dest -> $source"
 }
 
+# creates a symbolic link to a single file
 link_file() {
   local source="$1"
   local dest="$2"
@@ -53,6 +55,7 @@ link_file() {
   echo "symlink created: $dest -> $source"
 }
 
+# create symbolic links for all apps in the repo
 create_symlinks() {
-  link_dir "$HOME/repos/dotfiles/.config/nvim/" "$HOME/.config/nvim"
+  link_dir "$HOME/repos/dotfiles/nvim" "$HOME/.config/nvim"
 }
