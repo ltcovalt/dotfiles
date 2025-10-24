@@ -9,6 +9,7 @@ fi
 
 # Enable strict mode only when executed directly (not sourced)
 if [[ "$IS_SOURCED" == false ]]; then
+  echo "setting strict mode"
   set -Eeuo pipefail
 fi
 
@@ -16,7 +17,7 @@ fi
 link_dir() {
   local source="$1"
   local dest="$2"
-  
+
   # ensure parent directories exist
   mkdir -p "$(dirname "$dest")"
 
@@ -59,3 +60,4 @@ link_file() {
 create_symlinks() {
   link_dir "$HOME/repos/dotfiles/nvim" "$HOME/.config/nvim"
 }
+create_symlinks
