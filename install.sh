@@ -1,17 +1,6 @@
 #!/usr/bin/env bash
 
-# check if script was sourced or executed directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  IS_SOURCED=false
-else
-  IS_SOURCED=true
-fi
-
-# Enable strict mode only when executed directly (not sourced)
-if [[ "$IS_SOURCED" == false ]]; then
-  echo "setting strict mode"
-  set -Eeuo pipefail
-fi
+set -Eeuo pipefail
 
 # creates a symbolic link to a directory
 link_dir() {
@@ -56,8 +45,10 @@ link_file() {
   echo "symlink created: $dest -> $source"
 }
 
-# create symbolic links for all apps in the repo
-create_symlinks() {
+main() {
   link_dir "$HOME/repos/dotfiles/nvim" "$HOME/.config/nvim"
 }
-create_symlinks
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi
