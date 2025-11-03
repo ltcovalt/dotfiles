@@ -47,7 +47,7 @@ vim.o.list = true
 --  It is very similar to `vim.o` but offers an interface for conveniently interacting with tables.
 --   See `:help lua-options`
 --   and `:help lua-options-guide`
-vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+vim.opt.listchars = { tab = "⇥ ", trail = "·", nbsp = "␣" }
 
 vim.o.inccommand = "split" -- preview substitutions live while typing
 vim.o.cursorline = true -- highlight the line the cursor is on
@@ -111,7 +111,7 @@ require("lazy").setup({
 	{ import = "plugins.conform" }, -- auto-formatting
 	-- { import = 'plugins.debug' }, -- dap plugin for debugging code, configured for golang by default
 	{ import = "plugins.gitsigns" }, -- add git status lines beside line numbers
-	{ import = "plugins.indent_line" }, -- displays visual line indents
+	{ import = "plugins.indent-blankline" }, -- displays visual line indents
 	{ import = "plugins.lazydev" }, -- configures LUA LSP for nvim congigs
 	-- { import = 'plugins.lint' }, -- provides multiple linters
 	{ import = "plugins.lsp" }, -- main LSP configuration
