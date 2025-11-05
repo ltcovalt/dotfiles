@@ -49,3 +49,4 @@ function Link-File($source, $dest) {
 $repo = $PSScriptRoot
 
 Link-Dir "$repo\nvim" "$env:LOCALAPPDATA\nvim"
+Link-File "$repo\prettier\prettierrc.json" "$env:USERPROFILE\.prettierrc.json"

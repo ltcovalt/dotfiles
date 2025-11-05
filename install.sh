@@ -47,6 +47,7 @@ link_file() {
 
 main() {
   link_dir "$HOME/repos/dotfiles/nvim" "$HOME/.config/nvim"
+  link_file "$HOME/repos/dotfiles/prettier/prettierrc.json" "$HOME/.prettierrc.json"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
