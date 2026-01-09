@@ -6,7 +6,7 @@ return { -- Autoformat
 		{
 			"<leader>f",
 			function()
-				require("conform").format({ async = true, lsp_format = "fallback" })
+				require("conform").format({ async = true })
 			end,
 			mode = "",
 			desc = "[F]ormat buffer",
@@ -23,8 +23,7 @@ return { -- Autoformat
 				return nil
 			else
 				return {
-					timeout_ms = 500,
-					lsp_format = "fallback",
+					timeout_ms = 2000,
 				}
 			end
 		end,
@@ -34,12 +33,13 @@ return { -- Autoformat
 			--
 			-- You can use 'stop_after_first' to run the first available formatter from the list
 			-- javascript = { "prettierd", "prettier", stop_after_first = true },
-			css = { "prettier", stop_after_first = true },
-			javascript = { "prettier", stop_after_first = true },
-			json = { "prettier", stop_after_first = true },
+			astro = { "prettier" },
+			css = { "prettier" },
+			javascript = { "prettier" },
+			json = { "prettier" },
 			lua = { "stylua" },
-			markdown = { "prettier", stop_after_first = true },
-			mdx = { "prettier", stop_after_first = true },
+			markdown = { "prettier" },
+			mdx = { "prettier" },
 		},
 	},
 }
