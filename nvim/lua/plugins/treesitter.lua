@@ -52,6 +52,13 @@ return {
 						["[M"] = "@function.outer",
 					},
 				},
+				select = {
+					enable = true,
+					keymaps = {
+						["af"] = "@function.outer",
+						["if"] = "@function.inner",
+					},
+				},
 			},
 		})
 
