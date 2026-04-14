@@ -61,17 +61,5 @@ return {
 				},
 			},
 		})
-
-		vim.api.nvim_create_autocmd("FileType", {
-			callback = function(args)
-				local ft = vim.bo[args.buf].filetype
-				if vim.tbl_contains(install_languages, ft) then
-					vim.treesitter.start(args.buf)
-					if ft ~= "ruby" then
-						vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-					end
-				end
-			end,
-		})
 	end,
 }

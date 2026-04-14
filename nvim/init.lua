@@ -61,7 +61,6 @@ vim.o.shiftwidth = indentWidth
 vim.o.tabstop = indentWidth
 vim.o.softtabstop = indentWidth
 vim.o.autoindent = true
-vim.o.smartindent = true
 vim.o.smarttab = true
 
 -- NOTE: [[ KEYMAPS ]]
