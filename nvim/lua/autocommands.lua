@@ -20,9 +20,9 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 
--- Auto-insert closing */ when Enter is pressed on a line containing only /* or /**
--- Native formatoptions 'r' inserts the ' * ' continuation; we just add the closing line.
--- Uses delete+re-add mapping so the CR falls through to autopairs/default for {} etc.
+-- Auto-expand /* or /** into a full block comment when Enter is pressed.
+-- Returns "" to consume the CR (preventing blink.cmp from accepting a ts_ls JSDoc snippet),
+-- then inserts ' * ' and ' */' via vim.schedule. {} etc. fall through to autopairs.
 local function setup_comment_close()
 	-- replace_keycodes = false: autopairs_cr() returns already-encoded bytes;
 	-- without this, Neovim double-processes them and inserts raw <80> garbage.
@@ -34,12 +34,17 @@ local function setup_comment_close()
 		-- (blocks, parens, arrays) is left entirely to autopairs and treesitter.
 		local comment_indent = line:match("^(%s*)%/%*+%s*$")
 		if comment_indent then
-			vim.keymap.del("i", "<CR>", { buffer = 0 })
+			-- Return "" (consume the CR without inserting it) so blink.cmp never
+			-- sees the Enter and can't accept a ts_ls JSDoc snippet completion.
+			-- vim.schedule inserts the two new lines after the expr mapping exits.
 			vim.schedule(function()
-				vim.api.nvim_buf_set_lines(0, row + 1, row + 1, false, { comment_indent .. " */" })
-				setup_comment_close()
+				vim.api.nvim_buf_set_lines(0, row, row, false, {
+					comment_indent .. " * ",
+					comment_indent .. " */",
+				})
+				vim.api.nvim_win_set_cursor(0, { row + 1, #(comment_indent .. " * ") })
 			end)
-			return vim.api.nvim_replace_termcodes("<CR>", true, false, true)
+			return ""
 		end
 
 		local ok, npairs = pcall(require, "nvim-autopairs")
