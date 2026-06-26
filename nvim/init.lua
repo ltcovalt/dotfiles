@@ -1,3 +1,53 @@
+-- Hook into Treesitter query predicates for compatibility with Neovim 0.11/0.12
+local ok_query, query = pcall(require, "vim.treesitter.query")
+if ok_query then
+	local old_add_predicate = query.add_predicate
+	query.add_predicate = function(name, handler, options)
+		local function wrapped_handler(match, pattern, bufnr, pred, metadata)
+			local wrapped_match = setmetatable({}, {
+				__index = function(_, key)
+					local val = match[key]
+					if type(val) == "table" and not pcall(function() return val:type() end) then
+						return val[1]
+					end
+					return val
+				end,
+				__newindex = function(_, key, val)
+					match[key] = val
+				end,
+				__pairs = function()
+					return pairs(match)
+				end
+			})
+			return handler(wrapped_match, pattern, bufnr, pred, metadata)
+		end
+		return old_add_predicate(name, wrapped_handler, options)
+	end
+
+	local old_add_directive = query.add_directive
+	query.add_directive = function(name, handler, options)
+		local function wrapped_handler(match, pattern, bufnr, pred, metadata)
+			local wrapped_match = setmetatable({}, {
+				__index = function(_, key)
+					local val = match[key]
+					if type(val) == "table" and not pcall(function() return val:type() end) then
+						return val[1]
+					end
+					return val
+				end,
+				__newindex = function(_, key, val)
+					match[key] = val
+				end,
+				__pairs = function()
+					return pairs(match)
+				end
+			})
+			return handler(wrapped_match, pattern, bufnr, pred, metadata)
+		end
+		return old_add_directive(name, wrapped_handler, options)
+	end
+end
+
 -- NOTE: [[ VIM GLOBALS ]]
 --
 -- Set <space> as the leader key
