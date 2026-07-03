@@ -201,6 +201,7 @@ return {
       'stylua', -- Used to format Lua code
       'prettierd', -- daemon based JavaScript formatter
       'prettier', -- JavaScript formatter
+      'goimports', -- Used to format Go code and organize imports
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

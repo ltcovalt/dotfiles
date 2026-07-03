@@ -6,7 +6,7 @@ return { -- Autoformat
 		{
 			"<leader>f",
 			function()
-				require("conform").format({ async = true })
+				require("conform").format({ async = true, lsp_format = "fallback" })
 			end,
 			mode = "",
 			desc = "[F]ormat buffer",
@@ -24,6 +24,7 @@ return { -- Autoformat
 			else
 				return {
 					timeout_ms = 2000,
+					lsp_format = "fallback",
 				}
 			end
 		end,
@@ -35,6 +36,7 @@ return { -- Autoformat
 			-- javascript = { "prettierd", "prettier", stop_after_first = true },
 			astro = { "prettier" },
 			css = { "prettier" },
+			go = { "goimports", "gofmt", stop_after_first = true },
 			javascript = { "prettier" },
 			json = { "prettier" },
 			lua = { "stylua" },
