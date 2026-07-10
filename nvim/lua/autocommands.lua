@@ -19,6 +19,16 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- Treat hyphenated-words as a single word in HTML, CSS, and Svelte
+vim.api.nvim_create_autocmd("FileType", {
+	desc = "Treat hyphenated-words as a single word",
+	group = vim.api.nvim_create_augroup("iskeyword-hyphen", { clear = true }),
+	pattern = { "html", "css", "svelte" },
+	callback = function()
+		vim.opt_local.iskeyword:append("-")
+	end,
+})
+
 
 -- Auto-expand /* or /** into a full block comment when Enter is pressed.
 -- Returns "" to consume the CR (preventing blink.cmp from accepting a ts_ls JSDoc snippet),
