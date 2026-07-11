@@ -24,6 +24,7 @@ return {
 			"css",
 			"javascript",
 			"tsx",
+			"svelte",
 		}
 
 		configs.setup({

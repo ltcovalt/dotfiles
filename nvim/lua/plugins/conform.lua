@@ -42,6 +42,16 @@ return { -- Autoformat
 			lua = { "stylua" },
 			markdown = { "prettier" },
 			mdx = { "prettier" },
+			svelte = { "prettier_svelte" },
+		},
+		formatters = {
+			prettier_svelte = {
+				inherit = "prettier",
+				prepend_args = {
+					"--plugin",
+					vim.fn.expand("~/.local/share/nvim/mason/packages/prettier/node_modules/prettier-plugin-svelte/plugin.js"),
+				},
+			},
 		},
 	},
 }

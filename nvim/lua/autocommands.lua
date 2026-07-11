@@ -98,7 +98,7 @@ end
 vim.api.nvim_create_autocmd("FileType", {
 	desc = "Auto-close block comments with */ on Enter",
 	group = vim.api.nvim_create_augroup("comment-close", { clear = true }),
-	pattern = { "javascript", "typescript", "typescriptreact", "javascriptreact", "css" },
+	pattern = { "javascript", "typescript", "typescriptreact", "javascriptreact", "css", "svelte" },
 	callback = setup_comment_close,
 })
 
@@ -168,7 +168,7 @@ end
 vim.api.nvim_create_autocmd("FileType", {
 	desc = "Override indentexpr for JSDoc alignment in JS/TS files",
 	group = vim.api.nvim_create_augroup("jsdoc-indent-override", { clear = true }),
-	pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "tsx" },
+	pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "tsx", "svelte" },
 	callback = function(event)
 		local bufnr = event.buf
 
@@ -183,3 +183,13 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- Enable word wrap and line breaking for quickfix/location list windows
+vim.api.nvim_create_autocmd("FileType", {
+	desc = "Enable word wrap for quickfix/location list windows",
+	group = vim.api.nvim_create_augroup("qf-wrap", { clear = true }),
+	pattern = "qf",
+	callback = function()
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+	end,
+})
