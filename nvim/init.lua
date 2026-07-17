@@ -88,6 +88,18 @@ vim.o.timeout = true -- enable mapped key timeout
 vim.o.timeoutlen = 500 -- 500ms timeout for multi-key mappings
 vim.o.wrap = false -- disable word wrap by default
 
+-- Set shell to powershell on Windows to avoid cmd.exe
+local os = require("utils.os")
+if os.is_windows then
+	local powershell = vim.fn.executable("pwsh") == 1 and "pwsh" or "powershell"
+	vim.o.shell = powershell
+	vim.o.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;"
+	vim.o.shellredir = "2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode"
+	vim.o.shellpipe = "2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode"
+	vim.o.shellquote = ""
+	vim.o.shellxquote = ""
+end
+
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
