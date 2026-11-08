@@ -147,7 +147,7 @@ _G.custom_jsdoc_indent = function()
 		end
 	end
 
-	-- 3. Otherwise, fall back to native JS/TS indent functions
+	-- 3. Otherwise, fall back to native JS/TS/CSS indent functions
 	local ft = vim.bo[bufnr].filetype
 	if ft == "javascript" or ft == "javascriptreact" then
 		if vim.fn.exists("*GetJavascriptIndent") == 1 then
@@ -159,6 +159,11 @@ _G.custom_jsdoc_indent = function()
 			local ok, res = pcall(vim.api.nvim_eval, "GetTypescriptIndent()")
 			if ok then return res end
 		end
+	elseif ft == "css" then
+		if vim.fn.exists("*GetCSSIndent") == 1 then
+			local ok, res = pcall(vim.api.nvim_eval, "GetCSSIndent()")
+			if ok then return res end
+		end
 	end
 
 	-- 4. Final fallback
@@ -166,9 +171,9 @@ _G.custom_jsdoc_indent = function()
 end
 
 vim.api.nvim_create_autocmd("FileType", {
-	desc = "Override indentexpr for JSDoc alignment in JS/TS files",
+	desc = "Override indentexpr for JSDoc/block comment alignment in JS/TS/CSS files",
 	group = vim.api.nvim_create_augroup("jsdoc-indent-override", { clear = true }),
-	pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "tsx", "svelte" },
+	pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "tsx", "svelte", "css" },
 	callback = function(event)
 		local bufnr = event.buf
 
