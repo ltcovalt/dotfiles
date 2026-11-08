@@ -4,7 +4,12 @@ return {
   dependencies = { 'MunifTanjim/nui.nvim', 'rcarriga/nvim-notify' },
   opts = {
     -- ":" commandline as a floating popup
-    cmdline = { view = 'cmdline_popup' },
+    cmdline = {
+      view = 'cmdline_popup',
+      format = {
+        filter = { pattern = '^:%s*!', icon = '$', ft = 'sh', title = ' Shell ' },
+      },
+    },
 
     -- route messages to toast notifications
     messages = {
