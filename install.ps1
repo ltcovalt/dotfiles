@@ -50,3 +50,4 @@ $repo = $PSScriptRoot
 
 Link-Dir "$repo\nvim" "$env:LOCALAPPDATA\nvim"
 Link-File "$repo\prettier\prettierrc.json" "$env:USERPROFILE\.prettierrc.json"
+Link-Dir "$repo\antigravity\skills" "$env:USERPROFILE\.gemini\config\skills"

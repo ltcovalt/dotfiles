@@ -46,8 +46,12 @@ link_file() {
 }
 
 main() {
-  link_dir "$HOME/repos/dotfiles/nvim" "$HOME/.config/nvim"
-  link_file "$HOME/repos/dotfiles/prettier/prettierrc.json" "$HOME/.prettierrc.json"
+  local repo
+  repo="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+  link_dir "$repo/nvim" "$HOME/.config/nvim"
+  link_file "$repo/prettier/prettierrc.json" "$HOME/.prettierrc.json"
+  link_dir "$repo/antigravity/skills" "$HOME/.gemini/config/skills"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
