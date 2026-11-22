@@ -51,6 +51,8 @@ main() {
 
   link_dir "$repo/nvim" "$HOME/.config/nvim"
   link_file "$repo/prettier/prettierrc.json" "$HOME/.prettierrc.json"
+  link_file "$repo/antigravity/GEMINI.md" "$HOME/.gemini/GEMINI.md"
+  link_dir "$repo/antigravity/rules" "$HOME/.gemini/config/rules"
   link_dir "$repo/antigravity/skills" "$HOME/.gemini/config/skills"
 }
 
