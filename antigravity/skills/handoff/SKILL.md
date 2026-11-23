@@ -21,17 +21,19 @@ repositories unless the user also invokes `/ship`.
      workspace path (e.g., `C:\Users\<user>\Repos` on Windows or
      `/home/<user>/repos` / `/home/<user>/Repos` on Linux).
    - Locate `agent-context` case-insensitively under `<home>/repos/agent-context`
-     or `<home>/Repos/agent-context` (on Linux, check whichever casing exists;
-     if not cloned yet, clone `https://github.com/ltcovalt/agent-context.git` or
-     `git@github.com:ltcovalt/agent-context.git` into the user's existing
-     `repos`/`Repos` directory).
+     or `<home>/Repos/agent-context` (on Linux, check whichever casing exists).
+   - If `agent-context` is not cloned yet on this machine, create `<home>/repos`
+     if neither `repos` nor `Repos` exists, then clone
+     `git@github.com:ltcovalt/agent-context.git` (falling back to
+     `https://github.com/ltcovalt/agent-context.git`) into that directory.
    - Always use the resolved **literal absolute path** (no `$VAR` or `$(...)`
      shell expansions) in `git -C <agent-context-path> ...` commands so command
      approvals remain prefix-matchable.
 
 2. **Pull latest `agent-context`**:
-   - Run `git -C <agent-context-path> pull --rebase` so local handoffs are
-     up to date before writing.
+   - If `agent-context` was already cloned, run
+     `git -C <agent-context-path> pull --rebase` so local handoffs are up to
+     date before writing (skip if freshly cloned in Step 1).
 
 3. **Inspect active workspace repositories**:
    - For each active workspace repository, check the current branch, latest
