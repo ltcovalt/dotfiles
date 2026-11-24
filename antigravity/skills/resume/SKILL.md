@@ -1,17 +1,22 @@
 ---
 name: resume
 description: >-
-  Pull the latest cross-machine session context, unfinished implementation
-  plans, and analysis artifacts from the agent-context repository, verify
-  active workspace repository git state against the snapshot, and brief the
-  user on the exact next steps. Use when the user invokes /resume or asks to
-  pick up where they left off.
+  Pull pending cross-machine handoff batons from the agent-context repository,
+  disambiguate multiple parallel handoffs, detect stale handoffs via git
+  ancestry, load active plans/artifacts into the current session, consume the
+  picked-up baton from agent-context, and brief the user on exact next steps.
+  Use when the user invokes /resume or asks to pick up where they left off.
 ---
 
-# Resume (Load Session Context From Another Machine)
+# Resume (Pick Up a Session Handoff From Another Machine)
 
-Invoking `/resume` pulls the latest handoff context and artifacts from the
-`agent-context` repository and gets the current conversation up to speed.
+Invoking `/resume` pulls pending handoff batons from `agent-context`, loads the
+selected handoff into the current conversation, and **consumes (removes) that
+baton** from `agent-context` so finished sessions never leave stale files behind.
+
+Invoking `/resume` counts as explicit user approval to pull, remove the consumed
+handoff folder, commit, and push `agent-context` (every consumed handoff remains
+recoverable from `agent-context` git history if ever needed).
 
 ## Steps
 
@@ -34,29 +39,74 @@ Invoking `/resume` pulls the latest handoff context and artifacts from the
      `git -C <agent-context-path> pull --rebase` (skip if freshly cloned in
      Step 1).
 
-3. **Locate and read the project handoff**:
-   - Look for `<agent-context-path>/<project>/HANDOFF.md` matching the active
-     workspace folder name(s) (e.g., `code-cad` for `code-cad` +
-     `code-cad-studio`). If not immediately clear, list folders in
-     `<agent-context-path>` and match against active workspace repo names.
-   - Read `HANDOFF.md` and any linked files in
-     `<agent-context-path>/<project>/artifacts/` using `read_file`.
+3. **Discover pending handoffs for the active project**:
+   - Determine `<project>` from the active workspace folder name(s) (e.g.,
+     `code-cad` for `code-cad` + `code-cad-studio`).
+   - Scan `<agent-context-path>/<project>/*/HANDOFF.md` (and also check legacy
+     `<agent-context-path>/<project>/HANDOFF.md` if present).
+   - **If 0 pending handoffs exist for `<project>`**:
+     - Check whether any *other* projects in `<agent-context-path>` have pending
+       handoffs and note them briefly if so.
+     - Run `git -C <agent-context-path> log -n 3 --oneline -- <project>` and
+       tell the user there are no active handoffs for `<project>`, mentioning
+       that the most recent consumed handoff can be restored from git history
+       upon request. Stop here.
+   - **If the user supplied a hint** (e.g. `/resume can-lid`):
+     - Match case-insensitively against `<slug>` or `# Handoff:` title. If
+       exactly one matches, select it; otherwise disambiguate below.
+   - **If 2 or more pending handoffs exist and selection is ambiguous**:
+     - Read the header metadata (`# Handoff:`, `Slug:`, `Updated:`, `Summary:`,
+       and `## Workspace Snapshot`) of every pending handoff in `<project>` and
+       run the staleness check (Step 4) on each.
+     - Use `ask_question` to present a concise multiple-choice picker where each
+       option shows: `<Title> (<slug>) — <Summary> [<Host>, <Date>, <freshness>]`
+       (and include a `"Discard stale handoff(s)"` option if any are stale).
+     - Wait for the user's choice before loading or consuming anything. Leave
+       all unselected sibling handoffs untouched in `agent-context`.
 
-4. **Check active workspace git state against the snapshot**:
-   - In each active workspace repository, check current branch, latest commit
-     (`git rev-parse --short HEAD`), and working tree status
-     (`git status --short`).
-   - Compare against the `## Workspace Snapshot` table in `HANDOFF.md`:
-     - If a workspace repo is on a different branch or behind the commit listed
-       in `HANDOFF.md`, note it clearly and offer to `git pull` / `git switch`
-       so the code matches the handoff state.
+4. **Check active workspace git state & staleness**:
+   - For each repository listed in the selected handoff's `## Workspace Snapshot`,
+     check its current branch, `HEAD` (`git rev-parse --short HEAD`), and
+     working tree (`git status --short`).
+   - Determine freshness relative to the snapshot commit `<sha>`:
+     - **Exact match**: `HEAD` equals `<sha>`.
+     - **Behind**: `HEAD` is an ancestor of `<sha>` or `<sha>` is not yet
+       present locally (offer to `git pull` / `git switch`).
+     - **Ahead (potentially stale)**: `<sha>` is a strict ancestor of `HEAD`
+       (`git merge-base --is-ancestor <sha> HEAD` succeeds and `HEAD != <sha>`).
+       Check `git log --oneline <sha>..HEAD` to see what landed since.
+   - **Staleness safety net**: If the handoff's tracked repo(s) are strictly
+     **ahead** of the snapshot (indicating newer commits were already completed
+     after the handoff was created), do **not** auto-consume yet — briefly show
+     the handoff summary alongside the newer commits and ask whether to:
+     - **Discard** the stale handoff (remove it from `agent-context`), or
+     - **Resume anyway** (load context and consume it).
 
-5. **Present a concise resume briefing**:
-   - Summarize in a few lines:
-     - **Where you left off** (goal & last completed work)
-     - **Loaded artifacts** (any active plan or analysis docs loaded from
-       `artifacts/`)
-     - **Repo sync check** (whether all active repos match the handoff commit
-       and branch)
-     - **Proposed next step** (the first unchecked `- [ ]` item under
-       `## Next Steps`, ready to begin immediately)
+5. **Load context & copy active artifacts locally**:
+   - Read the selected `HANDOFF.md` and every file under its `artifacts/` folder
+     (if present) using `read_file`.
+   - If `artifacts/` has active plans or analysis files, copy them into the
+     current conversation's `<Artifact Directory Path>/` via `write_file` so
+     they stay available locally after the baton is removed from `agent-context`.
+
+6. **Consume the baton in `agent-context`**:
+   - Delete ONLY the picked-up handoff directory
+     `<agent-context-path>/<project>/<slug>/` (or legacy
+     `<project>/HANDOFF.md` + `<project>/artifacts/`). Never delete sibling
+     handoffs belonging to other parallel tasks.
+   - Commit and push using literal paths:
+     - `git -C <agent-context-path> add -A`
+     - `git -C <agent-context-path> commit -m "resume(<project>/<slug>): picked up on <OS/Host>"`
+     - `git -C <agent-context-path> push`
+
+7. **Present a concise resume briefing**:
+   - **Where you left off** (title, slug, goal, and last completed work)
+   - **Loaded artifacts** (copied into the current session's artifact directory,
+     if any)
+   - **Repo sync check** (whether all active repos match the handoff commit and
+     branch, offering `git pull` / `git switch` if behind)
+   - **Baton status** (confirm `<project>/<slug>` was consumed from
+     `agent-context`, and mention if any other parallel handoffs remain queued
+     for `<project>`)
+   - **Proposed next step** (the first unchecked `- [ ]` item under
+     `## Next Steps`, ready to begin immediately)
