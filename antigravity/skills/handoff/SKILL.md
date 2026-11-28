@@ -16,9 +16,11 @@ the `agent-context` repository. It does **not** auto-push active project code
 repositories unless the user also invokes `/ship`.
 
 Handoffs use a **baton-pass** model: each handoff is stored in its own
-`<project>/<slug>/` folder so multiple disparate tasks can coexist safely within
-the same project, and `/resume` automatically consumes (removes) the baton once
-picked up.
+`handoffs/<project>/<slug>/` folder so multiple disparate tasks can coexist
+safely within the same project, and `/resume` automatically consumes (removes)
+the baton once picked up. Top-level `<project>/` directories at the repo root
+are reserved for permanent long-term project docs and must never be modified
+by `/handoff`.
 
 ## Steps
 
@@ -55,20 +57,22 @@ picked up.
        working on that same task, reuse that `<slug>`.
      - Otherwise, derive a concise, descriptive slug from the current task
        (e.g., `can-lid-model`, `windows-ci-fixes`, `export-modal-polish`).
-     - If `<agent-context-path>/<project>/<slug>/HANDOFF.md` already exists for
-       a **different** active task, append `-2` (or `-3`, etc.) so unrelated
-       parallel handoffs are never overwritten.
+     - If `<agent-context-path>/handoffs/<project>/<slug>/HANDOFF.md` already
+       exists for a **different** active task, append `-2` (or `-3`, etc.) so
+       unrelated parallel handoffs are never overwritten.
 
 4. **Copy unfinished plans & analysis artifacts**:
    - Check the current conversation's artifact directory (`<Artifact Directory Path>`)
      for any active implementation plans, analysis documents, or task notes that
      are still relevant to this task.
    - Copy each relevant artifact into
-     `<agent-context-path>/<project>/<slug>/artifacts/<filename>.md` (and remove
-     any stale files inside that same `<slug>/artifacts/` folder if updating an
-     existing slug). Never touch sibling `<project>/<other-slug>/` folders.
+     `<agent-context-path>/handoffs/<project>/<slug>/artifacts/<filename>.md`
+     (and remove any stale files inside that same `<slug>/artifacts/` folder if
+     updating an existing slug). Never touch sibling
+     `handoffs/<project>/<other-slug>/` folders or anything under top-level
+     `<project>/` at the repo root.
 
-5. **Write `<agent-context-path>/<project>/<slug>/HANDOFF.md`**:
+5. **Write `<agent-context-path>/handoffs/<project>/<slug>/HANDOFF.md`**:
    - Use `write_file` to write a concise, self-contained handoff document with a
      structured metadata header so `/resume` can disambiguate multiple handoffs
      at a glance:
@@ -110,8 +114,8 @@ picked up.
      - `git -C <agent-context-path> push`
 
 7. **Report summary & warn on unsynced code**:
-   - Confirm the handoff path (`<project>/<slug>`), commit hash, and any synced
-     artifacts pushed to `agent-context`.
+   - Confirm the handoff path (`handoffs/<project>/<slug>`), commit hash, and
+     any synced artifacts pushed to `agent-context`.
    - If any active workspace code repository has **uncommitted changes** or
      **unpushed commits**, highlight them clearly and ask if the user wants to
      run `/ship` (or push a `wip/...` branch) before leaving this machine.

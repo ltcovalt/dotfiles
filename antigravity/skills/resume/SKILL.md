@@ -42,15 +42,22 @@ recoverable from `agent-context` git history if ever needed).
 3. **Discover pending handoffs for the active project**:
    - Determine `<project>` from the active workspace folder name(s) (e.g.,
      `code-cad` for `code-cad` + `code-cad-studio`).
-   - Scan `<agent-context-path>/<project>/*/HANDOFF.md` (and also check legacy
-     `<agent-context-path>/<project>/HANDOFF.md` if present).
+   - Scan `<agent-context-path>/handoffs/<project>/*/HANDOFF.md` as the primary
+     location.
+   - As a backwards-compatible fallback, also check legacy
+     `<agent-context-path>/<project>/*/HANDOFF.md` **only** when a `HANDOFF.md`
+     file is explicitly present inside `<slug>/` (never treat permanent project
+     doc folders such as `<project>/strategy/` or `<project>/releases/` as
+     handoffs).
    - **If 0 pending handoffs exist for `<project>`**:
-     - Check whether any *other* projects in `<agent-context-path>` have pending
-       handoffs and note them briefly if so.
-     - Run `git -C <agent-context-path> log -n 3 --oneline -- <project>` and
-       tell the user there are no active handoffs for `<project>`, mentioning
-       that the most recent consumed handoff can be restored from git history
-       upon request. Stop here.
+     - Check whether any *other* projects have pending handoffs under
+       `<agent-context-path>/handoffs/*/*/HANDOFF.md` (or legacy
+       `<agent-context-path>/*/*/HANDOFF.md` where `HANDOFF.md` is explicitly
+       present) and note them briefly if so.
+     - Run `git -C <agent-context-path> log -n 3 --oneline -- handoffs/<project> <project>`
+       and tell the user there are no active handoffs for `<project>`,
+       mentioning that the most recent consumed handoff can be restored from
+       git history upon request. Stop here.
    - **If the user supplied a hint** (e.g. `/resume can-lid`):
      - Match case-insensitively against `<slug>` or `# Handoff:` title. If
        exactly one matches, select it; otherwise disambiguate below.
@@ -90,10 +97,15 @@ recoverable from `agent-context` git history if ever needed).
      they stay available locally after the baton is removed from `agent-context`.
 
 6. **Consume the baton in `agent-context`**:
-   - Delete ONLY the picked-up handoff directory
-     `<agent-context-path>/<project>/<slug>/` (or legacy
-     `<project>/HANDOFF.md` + `<project>/artifacts/`). Never delete sibling
-     handoffs belonging to other parallel tasks.
+   - Delete **only** the matched `<slug>/` directory:
+     - Primary path: `<agent-context-path>/handoffs/<project>/<slug>/` (if
+       `handoffs/<project>/` becomes empty afterward, remove the empty
+       `handoffs/<project>/` directory too).
+     - Legacy fallback path: `<agent-context-path>/<project>/<slug>/` (only
+       when matched via an explicit `HANDOFF.md` inside `<slug>/`).
+   - Never delete sibling handoffs belonging to other parallel tasks, and
+     **never** modify or delete permanent project docs or parent directories
+     under top-level `<agent-context-path>/<project>/`.
    - Commit and push using literal paths:
      - `git -C <agent-context-path> add -A`
      - `git -C <agent-context-path> commit -m "resume(<project>/<slug>): picked up on <OS/Host>"`
@@ -105,8 +117,9 @@ recoverable from `agent-context` git history if ever needed).
      if any)
    - **Repo sync check** (whether all active repos match the handoff commit and
      branch, offering `git pull` / `git switch` if behind)
-   - **Baton status** (confirm `<project>/<slug>` was consumed from
-     `agent-context`, and mention if any other parallel handoffs remain queued
-     for `<project>`)
+   - **Baton status** (confirm the consumed handoff path — e.g.,
+     `handoffs/<project>/<slug>` or legacy `<project>/<slug>` — was removed
+     from `agent-context`, and mention if any other parallel handoffs remain
+     queued for `<project>`)
    - **Proposed next step** (the first unchecked `- [ ]` item under
      `## Next Steps`, ready to begin immediately)
